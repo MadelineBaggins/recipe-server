@@ -1,0 +1,15 @@
+<html>
+<body>
+  <script type="module">
+    import init, { add } from './result/wasm.js';
+    async function run() {
+      // Load the module and run init
+      await init();
+
+      // Check the add function
+      alert(add(1, 1));
+    }
+    run();
+  </script>
+</body>
+</html>
