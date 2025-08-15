@@ -1,0 +1,15 @@
+var app = Elm.Main.init({
+  node: document.getElementById('elmroot')
+});
+</script>
+<script type="module">
+  import init, { add } from './pkg/wasm.js'
+  async function run() {
+    await init();
+    alert(add(1, 1));
+  }
+  run()
+</script>
+</div>
+</body>
+</html>

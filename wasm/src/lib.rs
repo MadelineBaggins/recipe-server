@@ -6,6 +6,11 @@ fn main() -> Result<(), JsValue> {
 }
 
 #[wasm_bindgen]
+pub fn md_to_html(md: String) -> String {
+    markdown::to_html(&md)
+}
+
+#[wasm_bindgen]
 pub fn add(left: i32, right: i32) -> i32 {
     left + right
 }
