@@ -58,6 +58,16 @@
       version = "0.2.0";
       src = ./rs;
       cargoLock.lockFile = ./rs/Cargo.lock;
+      postPatch = ''
+        # Depends on the elm-built js
+        cat \
+          src/index.header.html \
+          ${js system}/main.js \
+          src/index.footer.html > src/index.html
+        # And on the wasm package
+        mkdir -p src/pkg
+        cp ${wasm system}/* src/pkg
+      '';
     };
     # A development shell that can build the service
     # binary and all its components with make.
