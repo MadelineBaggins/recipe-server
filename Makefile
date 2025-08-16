@@ -18,8 +18,9 @@ rs/src/main.js: elm/src elm/elm.json
 	cd elm && elm make src/Main.elm --output ../rs/src/main.js
 
 clean:
+	rm -rf recipes.db
 	cd rs && cargo clean
-	cd rs && rm -rf src/pkg src/index.html src/main.js
+	cd rs && rm -rf src/pkg src/index.html src/main.js recipes.db
 	cd elm && rm -rf elm-stuff
 	cd wasm && cargo clean
 
