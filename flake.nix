@@ -91,6 +91,9 @@
         elm
         elm-language-server
         elm-format
+        # For working with databases
+        sqlx-cli
+        sqlite
       ];
     };
   in rec {

@@ -2,7 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+mod db;
+
 use rocket::{
+    fairing::AdHoc,
     http::ContentType,
     response::content::{RawHtml, RawJavaScript},
 };
@@ -28,5 +31,8 @@ fn wasm() -> (ContentType, &'static [u8]) {
 #[launch]
 fn rocket() -> _ {
     println!("Hello, world!");
-    rocket::build().mount("/", routes![index, wasm_js, wasm])
+    let db_setup = AdHoc::try_on_ignite("database", db::setup);
+    rocket::build()
+        .attach(db_setup)
+        .mount("/", routes![index, wasm_js, wasm])
 }
