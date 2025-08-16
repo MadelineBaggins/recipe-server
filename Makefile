@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Madeline Baggins <madeline@baggins.family>
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 rs/target/debug/recipe-server: rs/src rs/src/index.html rs/Cargo.toml rs/Cargo.toml rs/src/pkg
 	cd rs && cargo build
 
@@ -15,7 +19,7 @@ rs/src/main.js: elm/src elm/elm.json
 
 clean:
 	cd rs && cargo clean
-	cd rs && rm -rf src/pkg src/index.html
+	cd rs && rm -rf src/pkg src/index.html src/main.js
 	cd elm && rm -rf elm-stuff
 	cd wasm && cargo clean
 

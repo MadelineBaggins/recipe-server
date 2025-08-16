@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Madeline Baggins <madeline@baggins.family>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 use rocket::{
     http::ContentType,
     response::content::{RawHtml, RawJavaScript},

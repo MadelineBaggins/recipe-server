@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Madeline Baggins <madeline@baggins.family>
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 [package]
 name = "wasm"
 version = "0.1.0"
