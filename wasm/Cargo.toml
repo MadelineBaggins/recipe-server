@@ -11,7 +11,7 @@ edition = "2024"
 crate-type = [ "cdylib" ]
 
 [dependencies]
-maddi-recipe = "0.1.0"
+maddi-recipe = "0.1.3"
 markdown = "1.0.0"
 wasm-bindgen = "0.2.100"
 web-sys = { version = "0.3.77", features = ["Window"] }

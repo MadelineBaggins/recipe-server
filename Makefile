@@ -24,5 +24,8 @@ clean:
 	cd elm && rm -rf elm-stuff
 	cd wasm && cargo clean
 
-.PHONY: clean
+run: rs/target/debug/recipe-server
+	./rs/target/debug/recipe-server
+
+.PHONY: clean run
 	

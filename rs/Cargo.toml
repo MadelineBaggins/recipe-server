@@ -7,6 +7,9 @@ name = "recipe-server"
 version = "0.2.0"
 edition = "2024"
 
+[dependencies]
+serde = { version = "1.0.219", features = ["derive"] }
+
 [dependencies.rocket]
 version = "0.5.1"
 features = ["json"]
