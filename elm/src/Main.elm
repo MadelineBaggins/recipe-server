@@ -9,6 +9,8 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Http
+import Json.Decode as De
 import Url
 
 
@@ -35,12 +37,54 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , rootUrl : String
+    , page : Page
     }
 
 
+type Page
+    = Loading
+    | Home (List Recipe)
+    | Viewing Recipe
+    | Editing Recipe
+    | Error String
+
+
+type alias Recipe =
+    { slug : String
+    , content : String
+    }
+
+
+recipeDecoder : De.Decoder Recipe
+recipeDecoder =
+    De.map2 Recipe (De.field "slug" De.string) (De.field "content" De.string)
+
+
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    ( Model key url, Cmd.none )
+init _ url key =
+    case String.split "/recipe/" (Url.toString url) of
+        [ root, slug ] ->
+            ( Model key url root Loading, getRecipe root slug )
+
+        _ ->
+            ( Model key url (Url.toString url) Loading, getHome (Url.toString url) )
+
+
+getHome : String -> Cmd Msg
+getHome root =
+    Http.get
+        { url = root ++ "/api/get/recipes"
+        , expect = Http.expectJson LoadedHome (De.list recipeDecoder)
+        }
+
+
+getRecipe : String -> String -> Cmd Msg
+getRecipe root slug =
+    Http.get
+        { url = root ++ "/api/get/recipe/" ++ slug
+        , expect = Http.expectJson LoadedRecipe recipeDecoder
+        }
 
 
 
@@ -50,6 +94,8 @@ init flags url key =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | LoadedHome (Result Http.Error (List Recipe))
+    | LoadedRecipe (Result Http.Error Recipe)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,6 +113,18 @@ update msg model =
             ( { model | url = url }
             , Cmd.none
             )
+
+        LoadedHome (Ok recipes) ->
+            ( { model | page = Home recipes }, Cmd.none )
+
+        LoadedHome (Err _) ->
+            ( { model | page = Error "Could not load recipes" }, Cmd.none )
+
+        LoadedRecipe (Ok recipe) ->
+            ( { model | page = Viewing recipe }, Cmd.none )
+
+        LoadedRecipe (Err _) ->
+            ( { model | page = Error "Could not load recipe" }, Cmd.none )
 
 
 
