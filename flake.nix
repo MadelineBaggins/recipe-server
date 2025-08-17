@@ -58,7 +58,7 @@
     };
     # The service binary
     package = system: (rsPlatform system).buildRustPackage {
-      pname = "recipe-site";
+      pname = "recipe-server";
       version = "0.2.0";
       src = ./rs;
       cargoLock.lockFile = ./rs/Cargo.lock;
