@@ -79,6 +79,19 @@ mod api {
             .unwrap();
         get_recipe(db, slug).await
     }
+
+    #[post("/set/recipe/<slug>", data = "<content>")]
+    pub async fn set_recipe(
+        mut db: Connection<Recipes>,
+        slug: String,
+        content: String,
+    ) -> Option<Json<Recipe>> {
+        sqlx::query!("UPDATE recipes SET content=? WHERE slug=?", content, slug)
+            .execute(&mut **db)
+            .await
+            .unwrap();
+        get_recipe(db, slug).await
+    }
 }
 
 #[launch]
@@ -94,6 +107,11 @@ fn rocket() -> _ {
         )
         .mount(
             "/api",
-            routes![api::get_recipes, api::get_recipe, api::new_recipe],
+            routes![
+                api::get_recipes,
+                api::get_recipe,
+                api::new_recipe,
+                api::set_recipe
+            ],
         )
 }
