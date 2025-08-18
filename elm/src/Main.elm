@@ -3,15 +3,29 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 
 
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 import Http
 import Json.Decode as De
 import Url
+
+
+
+-- PORTS
+
+
+port showRecipe : String -> Cmd msg
+
+
+port scaleRecipe : String -> Cmd msg
+
+
+port ready : (String -> msg) -> Sub msg
 
 
 
@@ -61,6 +75,16 @@ recipeDecoder =
     De.map2 Recipe (De.field "slug" De.string) (De.field "content" De.string)
 
 
+recipeName : Recipe -> String
+recipeName recipe =
+    recipe.content |> String.split "\n" |> List.head |> Maybe.withDefault recipe.content |> String.dropLeft 2
+
+
+recipeDescription : Recipe -> String
+recipeDescription recipe =
+    recipe.content |> String.split "\n\n## Ingredients" |> List.head |> Maybe.withDefault recipe.content |> String.lines |> List.drop 2 |> String.join "\n"
+
+
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
     case String.split "/recipe/" (Url.toString url) of
@@ -96,11 +120,19 @@ type Msg
     | UrlChanged Url.Url
     | LoadedHome (Result Http.Error (List Recipe))
     | LoadedRecipe (Result Http.Error Recipe)
+    | Scale String
+    | Ready
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Scale factor ->
+            ( model, scaleRecipe factor )
+
+        Ready ->
+            init () model.url model.key
+
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -110,9 +142,7 @@ update msg model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | url = url }
-            , Cmd.none
-            )
+            init () url model.key
 
         LoadedHome (Ok recipes) ->
             ( { model | page = Home recipes }, Cmd.none )
@@ -121,7 +151,7 @@ update msg model =
             ( { model | page = Error "Could not load recipes" }, Cmd.none )
 
         LoadedRecipe (Ok recipe) ->
-            ( { model | page = Viewing recipe }, Cmd.none )
+            ( { model | page = Viewing recipe }, showRecipe recipe.content )
 
         LoadedRecipe (Err _) ->
             ( { model | page = Error "Could not load recipe" }, Cmd.none )
@@ -133,7 +163,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    ready (\_ -> Ready)
 
 
 
@@ -142,19 +172,40 @@ subscriptions _ =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "URL Interceptor"
-    , body =
-        [ text "The current URL is: "
-        , b [] [ text (Url.toString model.url) ]
-        , ul []
-            [ viewLink "/home"
-            , viewLink "/profile"
-            , viewLink "/reviews/the-century-of-the-self"
-            , viewLink "/reviews/public-opinion"
-            , viewLink "/reviews/shah-of-shahs"
+    case model.page of
+        Loading ->
+            { title = "Loading...", body = [] }
+
+        Home recipes ->
+            { title = "Recipes"
+            , body = recipes |> List.map (viewRecipeThumbnail model.rootUrl)
+            }
+
+        Viewing recipe ->
+            { title = recipeName recipe
+            , body =
+                [ input [ onInput Scale ] [], div [ id "recipe" ] [] ]
+            }
+
+        Editing recipe ->
+            { title = "Edit: " ++ recipeName recipe
+            , body = [ div [ id "editor" ] [], div [ id "recipe" ] [] ]
+            }
+
+        Error message ->
+            { title = "Error"
+            , body = [ text message ]
+            }
+
+
+viewRecipeThumbnail : String -> Recipe -> Html Msg
+viewRecipeThumbnail rootUrl recipe =
+    a [ href (rootUrl ++ "recipe/" ++ recipe.slug) ]
+        [ div []
+            [ h2 [] [ text (recipeName recipe) ]
+            , p [] [ text (recipeDescription recipe) ]
             ]
         ]
-    }
 
 
 viewLink : String -> Html msg

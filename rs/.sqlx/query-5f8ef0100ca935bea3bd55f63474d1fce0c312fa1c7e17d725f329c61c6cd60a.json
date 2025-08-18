@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE recipes SET content=? WHERE slug=?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "5f8ef0100ca935bea3bd55f63474d1fce0c312fa1c7e17d725f329c61c6cd60a"
+}

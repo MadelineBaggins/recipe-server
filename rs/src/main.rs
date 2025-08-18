@@ -16,7 +16,7 @@ extern crate rocket;
 mod r#static {
     use super::*;
 
-    #[get("/")]
+    #[catch(default)]
     pub fn index() -> RawHtml<&'static str> {
         RawHtml(include_str!("index.html"))
     }
@@ -101,10 +101,8 @@ fn rocket() -> _ {
     rocket::build()
         .attach(db_setup)
         // Mount the routes that serve static files
-        .mount(
-            "/",
-            routes![r#static::index, r#static::wasm_js, r#static::wasm],
-        )
+        .mount("/", routes![r#static::wasm_js, r#static::wasm])
+        .register("/", catchers![r#static::index])
         .mount(
             "/api",
             routes![

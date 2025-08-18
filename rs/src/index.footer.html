@@ -2,17 +2,38 @@
 // 
 // SPDX-License-Identifier: GPL-3.0-only
 
+function waitForElementById(id, callback, interval = 100) {
+  const checkInterval = setInterval(() => {
+    let element = document.getElementById(id);
+    if (element !== null) {
+      clearInterval(checkInterval);
+      callback(element);
+    }
+  }, interval);
+}
+
 var app = Elm.Main.init({
   node: document.getElementById('elmroot')
 });
-</script>
-<script type="module">
-  import init, { add } from './pkg/wasm.js'
-  async function run() {
-    await init();
-    alert(add(1, 1));
-  }
-  run()
+let wasm_js = (location.toString().split("recipe/")[0] + 'pkg/wasm.js');
+async function run() {
+  let wasm = await import(wasm_js);
+  await wasm.default();
+  let recipe = null;
+  // The callback for changing a recipe's markdown.
+  app.ports.showRecipe.subscribe(async function(content) {
+    recipe = wasm.recipe(content);
+    waitForElementById('recipe', (element) => {
+      element.innerHTML = recipe.html();
+    });
+  });
+  // The callback for scaling the recipe
+  app.ports.scaleRecipe.subscribe(async function(factor) {
+    document.getElementById('recipe').innerHTML = recipe.scale(parseFloat(factor)).html();
+  });
+  app.ports.ready.send("");
+}
+run()
 </script>
 </div>
 </body>
