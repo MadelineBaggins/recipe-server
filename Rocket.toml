@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2025 Madeline Baggins <madeline@baggins.family>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[global]
+address = "0.0.0.0"
