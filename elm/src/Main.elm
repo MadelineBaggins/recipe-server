@@ -12,6 +12,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Http
 import Json.Decode as De
+import Style exposing (..)
 import Url
 
 
@@ -201,7 +202,7 @@ view model =
 viewRecipeThumbnail : String -> Recipe -> Html Msg
 viewRecipeThumbnail rootUrl recipe =
     a [ href (rootUrl ++ "recipe/" ++ recipe.slug) ]
-        [ div []
+        [ card []
             [ h2 [] [ text (recipeName recipe) ]
             , p [] [ text (recipeDescription recipe) ]
             ]
