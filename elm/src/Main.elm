@@ -65,6 +65,7 @@ type Page
     | Home (List Recipe)
     | Viewing Recipe
     | Editing Recipe
+    | NewRecipe String
     | Error String
 
 
@@ -153,11 +154,28 @@ type Msg
     | Print
     | Edit String
     | Save
+    | NewRecipeNameFieldChanged String
+    | ToNewRecipe
+    | CreateRecipe String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ToNewRecipe ->
+            ( { model | page = NewRecipe "" }, Cmd.none )
+
+        CreateRecipe name ->
+            ( { model | page = Loading }, newRecipe model.rootUrl name )
+
+        NewRecipeNameFieldChanged name ->
+            case model.page of
+                NewRecipe _ ->
+                    ( { model | page = NewRecipe name }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
         Edit content ->
             case model.page of
                 Editing recipe ->
@@ -240,6 +258,22 @@ view model =
         Editing recipe ->
             viewRecipeEditor recipe
 
+        NewRecipe name ->
+            { title = "New Recipe"
+            , body =
+                [ card []
+                    [ h2 [] [ text "New Recipe" ]
+                    , input
+                        [ placeholder "Recipe Name"
+                        , value name
+                        , onInput NewRecipeNameFieldChanged
+                        ]
+                        []
+                    , button [ onClick (CreateRecipe name) ] [ text "Create" ]
+                    ]
+                ]
+            }
+
         Error message ->
             { title = "Error"
             , body = [ text message ]
@@ -250,13 +284,7 @@ viewHome : String -> List Recipe -> Browser.Document Msg
 viewHome rootUrl recipes =
     { title = "Recipes"
     , body =
-        (recipes |> List.map (viewRecipeThumbnail rootUrl))
-            ++ [ card []
-                    [ h2 [] [ text "New Recipe" ]
-                    , input [ placeholder "Recipe Name" ] []
-                    , button [] [ text "Create" ]
-                    ]
-               ]
+        (recipes |> List.map (viewRecipeThumbnail rootUrl)) ++ [ button [ onClick ToNewRecipe ] [ text "New" ] ]
     }
 
 

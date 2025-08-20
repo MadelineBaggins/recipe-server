@@ -89,7 +89,7 @@ mod api {
         name: String,
     ) -> Option<Json<Recipe>> {
         let content = format!(
-            "## {name}\n\n## Ingredients\n\n- 1 cup ingredient\n\n## Directions\n\n- An instruction"
+            "# {name}\n\n## Ingredients\n\n- 1 cup ingredient\n\n## Directions\n\n- An instruction"
         );
         sqlx::query!("INSERT INTO recipes VALUES(?,?)", slug, content)
             .execute(&mut **db)
