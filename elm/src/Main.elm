@@ -262,8 +262,8 @@ view model =
             { title = "New Recipe"
             , body =
                 [ card []
-                    [ h2 [] [ text "New Recipe" ]
-                    , input
+                    "New Recipe"
+                    [ input
                         [ placeholder "Recipe Name"
                         , value name
                         , onInput NewRecipeNameFieldChanged
@@ -284,7 +284,11 @@ viewHome : String -> List Recipe -> Browser.Document Msg
 viewHome rootUrl recipes =
     { title = "Recipes"
     , body =
-        (recipes |> List.map (viewRecipeThumbnail rootUrl)) ++ [ button [ onClick ToNewRecipe ] [ text "New" ] ]
+        [ centeredPage []
+            ((recipes |> List.map (viewRecipeThumbnail rootUrl))
+                ++ [ button [ onClick ToNewRecipe ] [ text "New" ] ]
+            )
+        ]
     }
 
 
@@ -338,10 +342,13 @@ viewRecipeEditor recipe =
 
 viewRecipeThumbnail : String -> Recipe -> Html Msg
 viewRecipeThumbnail rootUrl recipe =
-    a [ href (rootUrl ++ "recipe/" ++ recipe.slug) ]
+    a
+        [ href (rootUrl ++ "recipe/" ++ recipe.slug)
+        , style "text-decoration" "none"
+        ]
         [ card []
-            [ h2 [] [ text (recipeName recipe) ]
-            , p [] [ text (recipeDescription recipe) ]
+            (recipeName recipe)
+            [ p [] [ text (recipeDescription recipe) ]
             ]
         ]
 

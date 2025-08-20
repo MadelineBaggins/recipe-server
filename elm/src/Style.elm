@@ -9,14 +9,51 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
-card : List (Attribute msg) -> List (Html msg) -> Html msg
-card css content =
+centeredPage : List (Attribute msg) -> List (Html msg) -> Html msg
+centeredPage css content =
     div
-        ([ style "padding" "1em"
-         , style "margin" "1em"
-         , style "border" "1px solid black"
-         , style "border-radius" "1em"
+        ([ style "max-width" "50em"
+         , style "margin-left" "auto"
+         , style "margin-right" "auto"
+         , style "padding" "0.5em"
          ]
             ++ css
         )
         content
+
+
+card : List (Attribute msg) -> String -> List (Html msg) -> Html msg
+card css heading content =
+    let
+        borderRadius =
+            "0.5em"
+    in
+    div
+        ([ style "padding" "0em"
+         , style "margin-bottom" "1em"
+         , style "border" "solid 1px #555555"
+         , style "border-radius" borderRadius
+         , style "color" "white"
+         , style "box-shadow" "rgba(0, 0, 0, 0.6) 0px 0.2em 0.4em 0px"
+         ]
+            ++ css
+        )
+        [ div
+            [ style "border-top-right-radius" borderRadius
+            , style "border-top-left-radius" borderRadius
+            , style "background-color" "#252525"
+            , style "padding" "0.5em"
+            , style "color" "white"
+            , style "border-bottom" "solid 1px #555555"
+            ]
+            [ strong [] [ text heading ]
+            ]
+        , div
+            [ style "padding" "0.5em"
+            , style "background-color" "#303030"
+            , style "text-align" "center"
+            , style "border-bottom-right-radius" borderRadius
+            , style "border-bottom-left-radius" borderRadius
+            ]
+            content
+        ]
