@@ -982,6 +982,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "maddi-recipe"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "049ebb765590db1adeaae807146af30c6df9b9ce0e474574c852fa1b8bf81064"
+
+[[package]]
 name = "matchers"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1362,6 +1368,7 @@ dependencies = [
 name = "recipe-server"
 version = "0.2.0"
 dependencies = [
+ "maddi-recipe",
  "rocket",
  "rocket_db_pools",
  "serde",

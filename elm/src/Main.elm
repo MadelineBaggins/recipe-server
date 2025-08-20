@@ -9,7 +9,7 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as De
 import Style exposing (..)
@@ -68,12 +68,13 @@ type Page
 type alias Recipe =
     { slug : String
     , content : String
+    , factors : List Int
     }
 
 
 recipeDecoder : De.Decoder Recipe
 recipeDecoder =
-    De.map2 Recipe (De.field "slug" De.string) (De.field "content" De.string)
+    De.map3 Recipe (De.field "slug" De.string) (De.field "content" De.string) (De.field "factors" (De.list De.int))
 
 
 recipeName : Recipe -> String
@@ -183,10 +184,7 @@ view model =
             }
 
         Viewing recipe ->
-            { title = recipeName recipe
-            , body =
-                [ input [ onInput Scale ] [], div [ id "recipe" ] [] ]
-            }
+            viewRecipeViewer recipe
 
         Editing recipe ->
             { title = "Edit: " ++ recipeName recipe
@@ -197,6 +195,30 @@ view model =
             { title = "Error"
             , body = [ text message ]
             }
+
+
+viewScaleButton : Int -> Html Msg
+viewScaleButton factor =
+    let
+        scale =
+            1.0 / toFloat factor
+
+        label =
+            if factor == 1 then
+                "1"
+
+            else
+                "1/" ++ String.fromInt factor
+    in
+    button [ onClick (Scale (String.fromFloat scale)) ] [ text label ]
+
+
+viewRecipeViewer : Recipe -> Browser.Document Msg
+viewRecipeViewer recipe =
+    { title = recipeName recipe
+    , body =
+        [ input [ onInput Scale ] [], div [ id "recipe" ] [], div [] (recipe.factors |> List.map viewScaleButton) ]
+    }
 
 
 viewRecipeThumbnail : String -> Recipe -> Html Msg

@@ -8,6 +8,7 @@ version = "0.2.0"
 edition = "2024"
 
 [dependencies]
+maddi-recipe = "0.1.4"
 serde = { version = "1.0.219", features = ["derive"] }
 
 [dependencies.rocket]

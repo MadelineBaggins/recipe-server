@@ -37,17 +37,34 @@ mod api {
     use rocket::serde::Serialize;
     use rocket::serde::json::Json;
     use rocket_db_pools::Connection;
+    use sqlx::FromRow;
+    use sqlx::Row;
+    use sqlx::sqlite::SqliteRow;
 
     #[derive(Serialize)]
     pub struct Recipe {
         slug: String,
         content: String,
+        factors: Vec<i32>,
+    }
+
+    impl FromRow<'_, SqliteRow> for Recipe {
+        fn from_row(row: &'_ SqliteRow) -> Result<Self, sqlx::Error> {
+            let slug = row.try_get("slug")?;
+            let content: String = row.try_get("content")?;
+            let recipe = maddi_recipe::Recipe::parse(&content);
+            Ok(Self {
+                slug,
+                factors: recipe.divisors(),
+                content,
+            })
+        }
     }
 
     #[get("/get/recipes")]
     pub async fn get_recipes(mut db: Connection<Recipes>) -> Json<Vec<Recipe>> {
         Json(
-            sqlx::query_as!(Recipe, "SELECT * FROM recipes")
+            sqlx::query_as("SELECT slug, content FROM recipes")
                 .fetch_all(&mut **db)
                 .await
                 .unwrap(),
@@ -57,7 +74,8 @@ mod api {
     #[get("/get/recipe/<slug>")]
     pub async fn get_recipe(mut db: Connection<Recipes>, slug: String) -> Option<Json<Recipe>> {
         Some(Json(
-            sqlx::query_as!(Recipe, "SELECT * FROM recipes WHERE slug = ?", slug)
+            sqlx::query_as("SELECT * FROM recipes WHERE slug = ?")
+                .bind(slug)
                 .fetch_optional(&mut **db)
                 .await
                 .unwrap()?,
