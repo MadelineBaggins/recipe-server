@@ -116,6 +116,15 @@ getRecipe root slug =
         }
 
 
+setRecipe : String -> String -> String -> Cmd Msg
+setRecipe root slug content =
+    Http.post
+        { url = root ++ "/api/set/recipe/" ++ slug
+        , expect = Http.expectJson LoadedRecipe recipeDecoder
+        , body = Http.stringBody "application/json" content
+        }
+
+
 
 -- UPDATE
 
@@ -125,14 +134,35 @@ type Msg
     | UrlChanged Url.Url
     | LoadedHome (Result Http.Error (List Recipe))
     | LoadedRecipe (Result Http.Error Recipe)
+    | LoadedEditor Recipe
     | Scale String
     | Ready
     | Print
+    | Edit String
+    | Save
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Edit content ->
+            case model.page of
+                Editing recipe ->
+                    ( { model | page = Editing { recipe | content = content } }, showRecipe content )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        Save ->
+            case model.page of
+                Editing recipe ->
+                    ( { model | page = Loading }
+                    , setRecipe model.rootUrl recipe.slug recipe.content
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
         Print ->
             ( model, print "" )
 
@@ -161,6 +191,9 @@ update msg model =
 
         LoadedRecipe (Ok recipe) ->
             ( { model | page = Viewing recipe }, showRecipe recipe.content )
+
+        LoadedEditor recipe ->
+            ( { model | page = Editing recipe }, showRecipe recipe.content )
 
         LoadedRecipe (Err _) ->
             ( { model | page = Error "Could not load recipe" }, Cmd.none )
@@ -195,7 +228,17 @@ view model =
 
         Editing recipe ->
             { title = "Edit: " ++ recipeName recipe
-            , body = [ div [ id "editor" ] [], div [ id "recipe" ] [] ]
+            , body =
+                [ textarea
+                    [ style "width" "100%"
+                    , style "height" "50vh"
+                    , value recipe.content
+                    , onInput Edit
+                    ]
+                    []
+                , button [ onClick Save ] [ text "Save" ]
+                , div [ id "recipe" ] []
+                ]
             }
 
         Error message ->
@@ -224,7 +267,14 @@ viewRecipeViewer : Recipe -> Browser.Document Msg
 viewRecipeViewer recipe =
     { title = recipeName recipe
     , body =
-        [ input [ onInput Scale ] [], div [ id "recipe" ] [], div [] (recipe.factors |> List.map viewScaleButton), div [] [ button [ onClick Print ] [ text "Print" ] ] ]
+        [ input [ onInput Scale ] []
+        , div [ id "recipe" ] []
+        , div [] (recipe.factors |> List.map viewScaleButton)
+        , div []
+            [ button [ onClick Print ] [ text "Print" ]
+            , button [ onClick (LoadedEditor recipe) ] [ text "Edit" ]
+            ]
+        ]
     }
 
 
