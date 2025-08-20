@@ -227,19 +227,7 @@ view model =
             viewRecipeViewer recipe
 
         Editing recipe ->
-            { title = "Edit: " ++ recipeName recipe
-            , body =
-                [ textarea
-                    [ style "width" "100%"
-                    , style "height" "50vh"
-                    , value recipe.content
-                    , onInput Edit
-                    ]
-                    []
-                , button [ onClick Save ] [ text "Save" ]
-                , div [ id "recipe" ] []
-                ]
-            }
+            viewRecipeEditor recipe
 
         Error message ->
             { title = "Error"
@@ -274,6 +262,23 @@ viewRecipeViewer recipe =
             [ button [ onClick Print ] [ text "Print" ]
             , button [ onClick (LoadedEditor recipe) ] [ text "Edit" ]
             ]
+        ]
+    }
+
+
+viewRecipeEditor : Recipe -> Browser.Document Msg
+viewRecipeEditor recipe =
+    { title = "Edit: " ++ recipeName recipe
+    , body =
+        [ textarea
+            [ style "width" "100%"
+            , style "height" "50vh"
+            , value recipe.content
+            , onInput Edit
+            ]
+            []
+        , button [ onClick Save ] [ text "Save" ]
+        , div [ id "recipe" ] []
         ]
     }
 
