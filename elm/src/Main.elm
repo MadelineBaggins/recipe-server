@@ -219,9 +219,7 @@ view model =
             { title = "Loading...", body = [] }
 
         Home recipes ->
-            { title = "Recipes"
-            , body = recipes |> List.map (viewRecipeThumbnail model.rootUrl)
-            }
+            viewHome model.rootUrl recipes
 
         Viewing recipe ->
             viewRecipeViewer recipe
@@ -233,6 +231,20 @@ view model =
             { title = "Error"
             , body = [ text message ]
             }
+
+
+viewHome : String -> List Recipe -> Browser.Document Msg
+viewHome rootUrl recipes =
+    { title = "Recipes"
+    , body =
+        (recipes |> List.map (viewRecipeThumbnail rootUrl))
+            ++ [ card []
+                    [ h2 [] [ text "New Recipe" ]
+                    , input [ placeholder "Recipe Name" ] []
+                    , button [] [ text "Create" ]
+                    ]
+               ]
+    }
 
 
 viewScaleButton : Int -> Html Msg
