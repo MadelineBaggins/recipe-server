@@ -12,9 +12,10 @@ import Html.Attributes exposing (..)
 card : List (Attribute msg) -> List (Html msg) -> Html msg
 card css content =
     div
-        ([ style "border" "solid black 1px"
+        ([ style "padding" "1em"
+         , style "margin" "1em"
+         , style "border" "1px solid black"
          , style "border-radius" "1em"
-         , style "padding" "0.5em"
          ]
             ++ css
         )
