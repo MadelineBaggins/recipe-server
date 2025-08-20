@@ -125,6 +125,19 @@ setRecipe root slug content =
         }
 
 
+newRecipe : String -> String -> Cmd Msg
+newRecipe root name =
+    let
+        slug =
+            name |> String.toLower |> String.replace " " "-"
+    in
+    Http.post
+        { url = root ++ "/api/new/recipe/" ++ slug
+        , expect = Http.expectJson LoadedRecipe recipeDecoder
+        , body = Http.stringBody "application/text" name
+        }
+
+
 
 -- UPDATE
 
