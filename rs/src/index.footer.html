@@ -20,10 +20,12 @@ async function run() {
   let wasm = await import(wasm_js);
   await wasm.default();
   let recipe = null;
+  let recipe_md = null;
   // The callback for changing a recipe's markdown.
   app.ports.showRecipe.subscribe(async function(content) {
     recipe = wasm.recipe(content);
     waitForElementById('recipe', (element) => {
+      recipe_md = recipe.markdown();
       element.innerHTML = recipe.html();
     });
   });
@@ -40,8 +42,15 @@ async function run() {
     return parseFloat(fraction);
   }
   app.ports.scaleRecipe.subscribe(async function(factor) {
+    recipe_md = recipe.scale(parseFraction(factor)).markdown();
     document.getElementById('recipe').innerHTML = recipe.scale(parseFraction(factor)).html();
   });
+  app.ports.print.subscribe(async function(_) {
+    await fetch("/print/", {
+      method: "POST",
+      body: recipe_md
+    });
+  })
   app.ports.ready.send("");
 }
 run()

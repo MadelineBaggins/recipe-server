@@ -26,6 +26,9 @@ port showRecipe : String -> Cmd msg
 port scaleRecipe : String -> Cmd msg
 
 
+port print : String -> Cmd msg
+
+
 port ready : (String -> msg) -> Sub msg
 
 
@@ -124,11 +127,15 @@ type Msg
     | LoadedRecipe (Result Http.Error Recipe)
     | Scale String
     | Ready
+    | Print
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Print ->
+            ( model, print "" )
+
         Scale factor ->
             ( model, scaleRecipe factor )
 
@@ -217,7 +224,7 @@ viewRecipeViewer : Recipe -> Browser.Document Msg
 viewRecipeViewer recipe =
     { title = recipeName recipe
     , body =
-        [ input [ onInput Scale ] [], div [ id "recipe" ] [], div [] (recipe.factors |> List.map viewScaleButton) ]
+        [ input [ onInput Scale ] [], div [ id "recipe" ] [], div [] (recipe.factors |> List.map viewScaleButton), div [] [ button [ onClick Print ] [ text "Print" ] ] ]
     }
 
 
