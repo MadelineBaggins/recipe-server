@@ -9,6 +9,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
+borderRadius : String
+borderRadius =
+    "0.5em"
+
+
 centeredPage : List (Attribute msg) -> List (Html msg) -> Html msg
 centeredPage css content =
     div
@@ -22,12 +27,22 @@ centeredPage css content =
         content
 
 
+niceButton : List (Attribute msg) -> List (Html msg) -> Html msg
+niceButton css content =
+    button
+        ([ style "border" "solid 1px #555555"
+         , style "border-radius" borderRadius
+         , style "background-color" "#303030"
+         , style "color" "white"
+         , style "box-shadow" "rgba(0, 0, 0, 0.6) 0px 0.2em 0.4em 0px"
+         ]
+            ++ css
+        )
+        content
+
+
 card : List (Attribute msg) -> String -> List (Html msg) -> Html msg
 card css heading content =
-    let
-        borderRadius =
-            "0.5em"
-    in
     div
         ([ style "padding" "0em"
          , style "margin-bottom" "1em"

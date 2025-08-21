@@ -261,7 +261,9 @@ view model =
         NewRecipe name ->
             { title = "New Recipe"
             , body =
-                [ card []
+                [ card
+                    [ style "margin" "0.5em"
+                    ]
                     "New Recipe"
                     [ input
                         [ placeholder "Recipe Name"
@@ -269,7 +271,7 @@ view model =
                         , onInput NewRecipeNameFieldChanged
                         ]
                         []
-                    , button [ onClick (CreateRecipe name) ] [ text "Create" ]
+                    , niceButton [ onClick (CreateRecipe name) ] [ text "Create" ]
                     ]
                 ]
             }
@@ -286,7 +288,7 @@ viewHome rootUrl recipes =
     , body =
         [ centeredPage []
             ((recipes |> List.map (viewRecipeThumbnail rootUrl))
-                ++ [ button [ onClick ToNewRecipe ] [ text "New" ] ]
+                ++ [ niceButton [ onClick ToNewRecipe ] [ text "New" ] ]
             )
         ]
     }
@@ -305,7 +307,7 @@ viewScaleButton factor =
             else
                 "1/" ++ String.fromInt factor
     in
-    button [ onClick (Scale (String.fromFloat scale)) ] [ text label ]
+    niceButton [ onClick (Scale (String.fromFloat scale)) ] [ text label ]
 
 
 viewRecipeViewer : Recipe -> Browser.Document Msg
