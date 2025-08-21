@@ -41,7 +41,7 @@ niceButton css content =
         content
 
 
-card : List (Attribute msg) -> String -> List (Html msg) -> Html msg
+card : List (Attribute msg) -> List (Html msg) -> List (Html msg) -> Html msg
 card css heading content =
     div
         ([ style "padding" "0em"
@@ -61,12 +61,10 @@ card css heading content =
             , style "color" "white"
             , style "border-bottom" "solid 1px #555555"
             ]
-            [ strong [] [ text heading ]
-            ]
+            heading
         , div
             [ style "padding" "0.5em"
             , style "background-color" "#303030"
-            , style "text-align" "center"
             , style "border-bottom-right-radius" borderRadius
             , style "border-bottom-left-radius" borderRadius
             ]

@@ -261,17 +261,20 @@ view model =
         NewRecipe name ->
             { title = "New Recipe"
             , body =
-                [ card
-                    [ style "margin" "0.5em"
-                    ]
-                    "New Recipe"
-                    [ input
-                        [ placeholder "Recipe Name"
-                        , value name
-                        , onInput NewRecipeNameFieldChanged
+                [ centeredPage []
+                    [ card
+                        [ style "margin" "0.5em"
+                        , style "text-align" "center"
                         ]
-                        []
-                    , niceButton [ onClick (CreateRecipe name) ] [ text "Create" ]
+                        [ strong [] [ text "New Recipe" ] ]
+                        [ input
+                            [ placeholder "Recipe Name"
+                            , value name
+                            , onInput NewRecipeNameFieldChanged
+                            ]
+                            []
+                        , niceButton [ onClick (CreateRecipe name) ] [ text "Create" ]
+                        ]
                     ]
                 ]
             }
@@ -314,12 +317,24 @@ viewRecipeViewer : Recipe -> Browser.Document Msg
 viewRecipeViewer recipe =
     { title = recipeName recipe
     , body =
-        [ input [ onInput Scale ] []
-        , div [ id "recipe" ] []
-        , div [] (recipe.factors |> List.map viewScaleButton)
-        , div []
-            [ button [ onClick Print ] [ text "Print" ]
-            , button [ onClick (LoadedEditor recipe) ] [ text "Edit" ]
+        [ centeredPage []
+            [ card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Recipe  " ]
+                , niceButton
+                    [ onClick (LoadedEditor recipe)
+                    , style "margin-left" "0.5em"
+                    , style "float" "right"
+                    ]
+                    [ text "Edit" ]
+                , niceButton
+                    [ onClick Print
+                    , style "float" "right"
+                    ]
+                    [ text "Print" ]
+                ]
+                [ div [ id "recipe" ] [] ]
+            , input [ onInput Scale ] []
+            , div [] (recipe.factors |> List.map viewScaleButton)
             ]
         ]
     }
@@ -348,8 +363,10 @@ viewRecipeThumbnail rootUrl recipe =
         [ href (rootUrl ++ "recipe/" ++ recipe.slug)
         , style "text-decoration" "none"
         ]
-        [ card []
-            (recipeName recipe)
+        [ card
+            [ style "text-align" "center"
+            ]
+            [ strong [] [ text (recipeName recipe) ] ]
             [ p [] [ text (recipeDescription recipe) ]
             ]
         ]
