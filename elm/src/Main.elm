@@ -93,12 +93,16 @@ recipeDescription recipe =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
-    case String.split "/recipe/" (Url.toString url) of
+    case String.split "recipe/" (Url.toString url) of
         [ root, slug ] ->
             ( Model key url root Loading, getRecipe root slug )
 
         _ ->
-            ( Model key url (Url.toString url) Loading, getHome (Url.toString url) )
+            if Url.toString url |> String.endsWith "/" then
+                ( Model key url (Url.toString url) Loading, getHome (Url.toString url) )
+
+            else
+                ( Model key url (Url.toString url) Loading, getHome (Url.toString url ++ "/") )
 
 
 getHome : String -> Cmd Msg
@@ -261,7 +265,7 @@ view model =
         NewRecipe name ->
             { title = "New Recipe"
             , body =
-                [ viewHeader model.rootUrl
+                [ pageHeader model.rootUrl
                 , centeredPage []
                     [ card
                         [ style "margin" "0.5em"
@@ -286,8 +290,8 @@ view model =
             }
 
 
-viewHeader : String -> Html msg
-viewHeader rootUrl =
+pageHeader : String -> Html msg
+pageHeader rootUrl =
     a
         [ href rootUrl
         , style "text-decoration" "none"
@@ -324,7 +328,7 @@ viewHome : String -> List Recipe -> Browser.Document Msg
 viewHome rootUrl recipes =
     { title = "Recipes"
     , body =
-        [ viewHeader rootUrl
+        [ pageHeader rootUrl
         , centeredPage []
             ((recipes |> List.map (viewRecipeThumbnail rootUrl))
                 ++ [ niceButton [ onClick ToNewRecipe ] [ text "New" ] ]
@@ -357,7 +361,7 @@ viewRecipeViewer : String -> Recipe -> Browser.Document Msg
 viewRecipeViewer rootUrl recipe =
     { title = recipeName recipe
     , body =
-        [ viewHeader rootUrl
+        [ pageHeader rootUrl
         , centeredPage []
             [ card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Recipe  " ]
@@ -393,7 +397,7 @@ viewRecipeEditor : String -> Recipe -> Browser.Document Msg
 viewRecipeEditor rootUrl recipe =
     { title = "Edit: " ++ recipeName recipe
     , body =
-        [ viewHeader rootUrl
+        [ pageHeader rootUrl
         , centeredPage []
             [ card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Editor" ]
