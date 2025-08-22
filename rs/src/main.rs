@@ -114,7 +114,6 @@ mod api {
 
 #[launch]
 fn rocket() -> _ {
-    println!("Hello, world!");
     let db_setup = AdHoc::try_on_ignite("database", db::setup);
     rocket::build()
         .attach(db_setup)
