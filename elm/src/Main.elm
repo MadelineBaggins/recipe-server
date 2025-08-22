@@ -253,15 +253,16 @@ view model =
             viewHome model.rootUrl recipes
 
         Viewing recipe ->
-            viewRecipeViewer recipe
+            viewRecipeViewer model.rootUrl recipe
 
         Editing recipe ->
-            viewRecipeEditor recipe
+            viewRecipeEditor model.rootUrl recipe
 
         NewRecipe name ->
             { title = "New Recipe"
             , body =
-                [ centeredPage []
+                [ viewHeader model.rootUrl
+                , centeredPage []
                     [ card
                         [ style "margin" "0.5em"
                         , style "text-align" "center"
@@ -285,11 +286,46 @@ view model =
             }
 
 
+viewHeader : String -> Html msg
+viewHeader rootUrl =
+    a
+        [ href rootUrl
+        , style "text-decoration" "none"
+        , style "width" "100%"
+        ]
+        [ div
+            [ style "width" "100%"
+            , style "margin" "0em"
+            , style "background-color" "#252525"
+            , style "text-align" "center"
+            , style "box-sizing" "border-box"
+            , style "color" "white"
+            , style "padding" "0.1rem"
+            , style "border-bottom-left-radius" "2em"
+            , style "border-bottom-right-radius" "2em"
+            , style "margin-bottom" "1em"
+            , style "box-shadow" "rgba(0, 0, 0, 0.6) 0px 0.2em 0.4em 0px"
+            ]
+            [ h5
+                [ style "margin-bottom" "0em"
+                , style "margin-top" "0.5rem"
+                ]
+                [ text "Sophie & Maddie's" ]
+            , h1
+                [ style "margin-top" "0em"
+                , style "margin-bottom" "0.5rem"
+                ]
+                [ text "Recipe Box" ]
+            ]
+        ]
+
+
 viewHome : String -> List Recipe -> Browser.Document Msg
 viewHome rootUrl recipes =
     { title = "Recipes"
     , body =
-        [ centeredPage []
+        [ viewHeader rootUrl
+        , centeredPage []
             ((recipes |> List.map (viewRecipeThumbnail rootUrl))
                 ++ [ niceButton [ onClick ToNewRecipe ] [ text "New" ] ]
             )
@@ -310,14 +346,19 @@ viewScaleButton factor =
             else
                 "1/" ++ String.fromInt factor
     in
-    niceButton [ onClick (Scale (String.fromFloat scale)) ] [ text label ]
+    niceButton
+        [ style "margin" "0.1em"
+        , onClick (Scale (String.fromFloat scale))
+        ]
+        [ text label ]
 
 
-viewRecipeViewer : Recipe -> Browser.Document Msg
-viewRecipeViewer recipe =
+viewRecipeViewer : String -> Recipe -> Browser.Document Msg
+viewRecipeViewer rootUrl recipe =
     { title = recipeName recipe
     , body =
-        [ centeredPage []
+        [ viewHeader rootUrl
+        , centeredPage []
             [ card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Recipe  " ]
                 , niceButton
@@ -332,27 +373,55 @@ viewRecipeViewer recipe =
                     ]
                     [ text "Print" ]
                 ]
-                [ div [ id "recipe" ] [] ]
-            , input [ onInput Scale ] []
-            , div [] (recipe.factors |> List.map viewScaleButton)
+                [ div [ id "recipe" ] []
+                ]
+            , card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Scale Recipe" ] ]
+                [ input
+                    [ onInput Scale
+                    , placeholder "Custom scale"
+                    ]
+                    []
+                , div [] (recipe.factors |> List.map viewScaleButton)
+                ]
             ]
         ]
     }
 
 
-viewRecipeEditor : Recipe -> Browser.Document Msg
-viewRecipeEditor recipe =
+viewRecipeEditor : String -> Recipe -> Browser.Document Msg
+viewRecipeEditor rootUrl recipe =
     { title = "Edit: " ++ recipeName recipe
     , body =
-        [ textarea
-            [ style "width" "100%"
-            , style "height" "50vh"
-            , value recipe.content
-            , onInput Edit
+        [ viewHeader rootUrl
+        , centeredPage []
+            [ card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Editor" ]
+                , niceButton
+                    [ onClick Save
+                    , style "float" "right"
+                    ]
+                    [ text "Save" ]
+                ]
+                [ textarea
+                    [ style "width" "100%"
+                    , style "height" "50vh"
+                    , style "color" "white"
+                    , style "background-color" "#353535"
+                    , style "padding" "1em"
+                    , style "box-sizing" "border-box"
+                    , style "resize" "vertical"
+                    , style "font-size" "1.1em"
+                    , value recipe.content
+                    , onInput Edit
+                    ]
+                    []
+                ]
+            , card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Preview" ] ]
+                [ div [ id "recipe" ] []
+                ]
             ]
-            []
-        , button [ onClick Save ] [ text "Save" ]
-        , div [ id "recipe" ] []
         ]
     }
 
