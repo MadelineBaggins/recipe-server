@@ -7,9 +7,10 @@ port module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
+import File exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (on, onClick, onInput)
 import Http
 import Json.Decode as De
 import Style exposing (..)
@@ -73,12 +74,13 @@ type alias Recipe =
     { slug : String
     , content : String
     , factors : List Int
+    , image : String
     }
 
 
 recipeDecoder : De.Decoder Recipe
 recipeDecoder =
-    De.map3 Recipe (De.field "slug" De.string) (De.field "content" De.string) (De.field "factors" (De.list De.int))
+    De.map4 Recipe (De.field "slug" De.string) (De.field "content" De.string) (De.field "factors" (De.list De.int)) (De.field "image" De.string)
 
 
 recipeName : Recipe -> String
@@ -143,6 +145,15 @@ newRecipe root name =
         }
 
 
+setRecipeImage : String -> String -> File -> Cmd Msg
+setRecipeImage root slug file =
+    Http.post
+        { url = root ++ "/api/set/image/" ++ slug ++ "/" ++ File.name file
+        , expect = Http.expectJson LoadedRecipe recipeDecoder
+        , body = Http.fileBody file
+        }
+
+
 
 -- UPDATE
 
@@ -161,6 +172,7 @@ type Msg
     | NewRecipeNameFieldChanged String
     | ToNewRecipe
     | CreateRecipe String
+    | GotFiles (List File)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -232,6 +244,21 @@ update msg model =
 
         LoadedRecipe (Err _) ->
             ( { model | page = Error "Could not load recipe" }, Cmd.none )
+
+        GotFiles files ->
+            case model.page of
+                Editing recipe ->
+                    case files of
+                        [ file ] ->
+                            ( { model | page = Loading }
+                            , setRecipeImage model.rootUrl recipe.slug file
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -364,6 +391,9 @@ viewRecipeViewer rootUrl recipe =
         [ pageHeader rootUrl
         , centeredPage []
             [ card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Image" ] ]
+                [ img [ src (rootUrl ++ "/api/get/recipe/" ++ recipe.slug ++ "/" ++ recipe.image) ] [] ]
+            , card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Recipe  " ]
                 , niceButton
                     [ onClick (LoadedEditor recipe)
@@ -391,6 +421,11 @@ viewRecipeViewer rootUrl recipe =
             ]
         ]
     }
+
+
+filesDecoder : De.Decoder (List File)
+filesDecoder =
+    De.at [ "target", "files" ] (De.list File.decoder)
 
 
 viewRecipeEditor : String -> Recipe -> Browser.Document Msg
@@ -424,6 +459,15 @@ viewRecipeEditor rootUrl recipe =
             , card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Preview" ] ]
                 [ div [ id "recipe" ] []
+                ]
+            , card [ style "margin" "0.5em" ]
+                [ strong [] [ text "Upload Image" ] ]
+                [ input
+                    [ type_ "file"
+                    , multiple True
+                    , on "change" (De.map GotFiles filesDecoder)
+                    ]
+                    []
                 ]
             ]
         ]
