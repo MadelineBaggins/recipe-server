@@ -102,10 +102,11 @@ mod api {
                 .fetch_one(&mut **db)
                 .await
                 .unwrap();
-        let image_type = match image.rsplit_once(".") {
-            Some((_, "png")) => "png",
-            Some((_, "jpeg" | "jpg")) => "jpeg",
-            Some((_, "svg")) => "svg+xml",
+        let extension = image.rsplit_once(".").unwrap_or(("", "")).1.to_lowercase();
+        let image_type = match extension.as_str() {
+            "png" => "png",
+            "jpeg" | "jpg" => "jpeg",
+            "svg" => "svg+xml",
             _ => return None,
         };
         Some((ContentType::new("image", image_type), bytes))
