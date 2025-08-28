@@ -66,6 +66,7 @@ type Page
     | Home (List Recipe)
     | Viewing Recipe
     | Editing Recipe
+    | EditingImage Recipe
     | NewRecipe String
     | Error String
 
@@ -164,6 +165,7 @@ type Msg
     | LoadedHome (Result Http.Error (List Recipe))
     | LoadedRecipe (Result Http.Error Recipe)
     | LoadedEditor Recipe
+    | LoadedImageEditor Recipe
     | Scale String
     | Ready
     | Print
@@ -242,12 +244,15 @@ update msg model =
         LoadedEditor recipe ->
             ( { model | page = Editing recipe }, showRecipe recipe.content )
 
+        LoadedImageEditor recipe ->
+            ( { model | page = EditingImage recipe }, Cmd.none )
+
         LoadedRecipe (Err _) ->
             ( { model | page = Error "Could not load recipe" }, Cmd.none )
 
         GotFiles files ->
             case model.page of
-                Editing recipe ->
+                EditingImage recipe ->
                     case files of
                         [ file ] ->
                             ( { model | page = Loading }
@@ -288,6 +293,22 @@ view model =
 
         Editing recipe ->
             viewRecipeEditor model.rootUrl recipe
+
+        EditingImage recipe ->
+            { title = "Image: " ++ recipeName recipe
+            , body =
+                [ pageHeader model.rootUrl
+                , card [ style "margin" "0.5em" ]
+                    [ strong [] [ text "Upload Image" ] ]
+                    [ input
+                        [ type_ "file"
+                        , multiple False
+                        , on "change" (De.map GotFiles filesDecoder)
+                        ]
+                        []
+                    ]
+                ]
+            }
 
         NewRecipe name ->
             { title = "New Recipe"
@@ -391,8 +412,19 @@ viewRecipeViewer rootUrl recipe =
         [ pageHeader rootUrl
         , centeredPage []
             [ card [ style "margin" "0.5em" ]
-                [ strong [] [ text "Image" ] ]
-                [ img [ src (rootUrl ++ "/api/get/recipe/" ++ recipe.slug ++ "/" ++ recipe.image) ] [] ]
+                [ strong [] [ text "Image" ]
+                , niceButton
+                    [ onClick (LoadedImageEditor recipe)
+                    , style "float" "right"
+                    ]
+                    [ text "Edit" ]
+                ]
+                [ img
+                    [ src (rootUrl ++ "/api/get/recipe/" ++ recipe.slug ++ "/" ++ recipe.image)
+                    , style "width" "100%"
+                    ]
+                    []
+                ]
             , card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Recipe  " ]
                 , niceButton
@@ -459,15 +491,6 @@ viewRecipeEditor rootUrl recipe =
             , card [ style "margin" "0.5em" ]
                 [ strong [] [ text "Preview" ] ]
                 [ div [ id "recipe" ] []
-                ]
-            , card [ style "margin" "0.5em" ]
-                [ strong [] [ text "Upload Image" ] ]
-                [ input
-                    [ type_ "file"
-                    , multiple True
-                    , on "change" (De.map GotFiles filesDecoder)
-                    ]
-                    []
                 ]
             ]
         ]

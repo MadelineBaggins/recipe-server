@@ -57,7 +57,7 @@ mod api {
             let slug = row.try_get("slug")?;
             let content: String = row.try_get("content")?;
             let recipe = maddi_recipe::Recipe::parse(&content);
-            let image = row.try_get("image_slug")?;
+            let image = row.try_get("image_slug").ok().unwrap_or_else(String::new);
             Ok(Self {
                 slug,
                 factors: recipe.divisors(),
